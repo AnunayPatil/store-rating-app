@@ -99,3 +99,98 @@ Both frontend forms and backend endpoints validate against these rules[cite: 1]:
                           ├───────────────────────┤
                           │ UNIQUE(userId,storeId)│
                           └───────────────────────┘
+
+
+Fast Reproduction & Setup Guide
+1. Prerequisites
+Node.js: v18.x or v20+
+
+Package Manager: npm
+
+2. Backend Initialization
+# 1. Navigate to the backend directory
+cd server
+
+# 2. Install dependencies
+npm install
+
+# 3. Synchronize database and generate Prisma Client
+npx prisma generate
+npx prisma db push
+
+# 4. Seed test accounts & initial entities
+node seed.js
+
+# 5. Start the backend REST service
+node server.js
+
+3. Frontend Initialization
+
+# 1. Navigate to the client directory
+cd client
+
+# 2. Install dependencies
+npm install
+
+# 3. Start the Vite React development server
+npm run dev
+
+
+
+Complete REST API Specification
+🔐 Authentication Service
+POST /api/auth/register — Public registration for standard users[cite: 1].
+
+POST /api/auth/login — Single login endpoint returning signed JWT and role descriptor[cite: 1].
+
+PUT /api/auth/change-password — Protected password renewal for authenticated accounts[cite: 1].
+
+🛡️ Administrator Service (Bearer <ADMIN_JWT>)
+GET /api/admin/dashboard — Returns system metrics (totalUsers, totalStores, totalRatings)[cite: 1].
+
+GET /api/admin/users?search=&role=&sortBy=&sortOrder= — Filtered, searchable, and sorted user list[cite: 1].
+
+POST /api/admin/users — Admin creation of ADMIN or NORMAL_USER profiles[cite: 1].
+
+GET /api/admin/stores?search=&sortBy=&sortOrder= — Store listings with computed average star score[cite: 1].
+
+POST /api/admin/stores — Registers a new store and assigns ownership[cite: 1].
+
+👤 Normal User Service (Bearer <USER_JWT>)
+GET /api/stores?search=&sortBy=&sortOrder= — Store listings with computed overall score and current user's rating[cite: 1].
+
+POST /api/ratings — Atomic upsert (submission/modification) of a 1–5 store rating[cite: 1].
+
+🏪 Store Owner Service (Bearer <OWNER_JWT>)
+GET /api/owner/dashboard — Aggregates store average rating and lists all review submissions[cite: 1].
+
+🧪 Step-by-Step Evaluator Test Script
+Verify Role Redirection:
+
+Log in with admin@storerating.com → Redirects to /admin[cite: 1].
+
+Log out, log in with user@storerating.com → Redirects to /stores[cite: 1].
+
+Log out, log in with owner@storerating.com → Redirects to /owner[cite: 1].
+
+Verify Rating & Modification:
+
+As user@storerating.com, select store Downtown Supermarket Express and submit a 5-star rating[cite: 1].
+
+Notice the "Overall Rating" and "My Rating" instantly update to 5[cite: 1].
+
+Change your rating to 3 stars → Confirm the rating successfully updates without creating duplicate entries[cite: 1].
+
+Verify Store Owner Real-Time View:
+
+Switch back to owner@storerating.com[cite: 1].
+
+Verify that the customer table now reflects Regular Platform Customer with a rating of 3[cite: 1].
+
+Verify Admin Dashboard Aggregates:
+
+Log in as admin@storerating.com[cite: 1].
+
+Confirm Total Ratings incremented to 1[cite: 1].
+
+Locate Store Owner Representative in the Users table; confirm Store Rating shows ⭐ 3.0 instead of N/A or empty[cite: 1].
