@@ -1,0 +1,45 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  address   String
+  role      String   @default("NORMAL_USER") // SQLite uses String instead of native Enum
+  ratings   Rating[]
+  stores    Store[]
+  createdAt DateTime @default(now())
+}
+
+model Store {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  address   String
+  ownerId   String?
+  owner     User?    @relation(fields: [ownerId], references: [id])
+  ratings   Rating[]
+  createdAt DateTime @default(now())
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  rating    Int
+  userId    String
+  storeId   String
+  user      User     @relation(fields: [userId], references: [id])
+  store     Store    @relation(fields: [storeId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, storeId])
+}
